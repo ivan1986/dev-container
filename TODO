@@ -1,0 +1,9 @@
+симфонийский бандл и phar
+robo биндинг
+нужен composer и php-cli + опционально libnss-docker и libnss-resolver
+
+ansible + galaxy (роли + updater) и кастомные в файлал проекта
+файлик настроек ансибла в проект с дефолтовыми параметрами
+настройки lamp
+включения DNS - три варианта - через докер, через libnss-resolver
+https://github.com/robbiev/devdns и dnsmasq
