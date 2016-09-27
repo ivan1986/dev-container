@@ -1,10 +1,12 @@
 {
     "name": "ivan1986/dev-container",
     "description": "Create vm for develop by ansible and docker",
+    "homepage": "https://github.com/jdorn/sql-formatter/",
+    "keywords": ["composer", "ansible", "dev"],
     "type": "library",
     "license": "MIT",
     "autoload": {
-        "psr-4": { "Ivan1986\\DevContainer\\": "" }
+        "psr-4": { "Ivan1986\\DevContainer\\": "src" }
     },
     "authors": [
         {
@@ -12,9 +14,12 @@
             "email": "ivan.borzenkov@gmail.com"
         }
     ],
+    "bin": [
+        "bin/container"
+    ],
     "minimum-stability": "dev",
     "require": {
-
+        "symfony/console": "~3.0"
     },
     "suggest": {
     }

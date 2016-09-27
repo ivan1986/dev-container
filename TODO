@@ -7,3 +7,5 @@ ansible + galaxy (роли + updater) и кастомные в файлал пр
 настройки lamp
 включения DNS - три варианта - через докер, через libnss-resolver
 https://github.com/robbiev/devdns и dnsmasq
+
+Отдельное консольно приложение и интеграция в основную симфонийскую консоль
