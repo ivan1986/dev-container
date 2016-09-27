@@ -1,11 +1,11 @@
 #!/usr/bin/env php
 <?php
 
-use Ivan1986\DevContainer\Command\AnsibleCommand;
-use Ivan1986\DevContainer\Command\RebuildCommand;
-use Ivan1986\DevContainer\Command\SshCommand;
-use Ivan1986\DevContainer\Command\UpCommand;
+use Ivan1986\DevContainer\Command;
+use Ivan1986\DevContainer\Event\NameResolverSubscriber;
 use Symfony\Component\Console\Application;
+use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\EventDispatcher\EventDispatcher;
 
 function includeIfExists($file)
 {
@@ -20,9 +20,19 @@ if ((!$loader = includeIfExists(__DIR__.'/../vendor/autoload.php')) && (!$loader
         'php composer.phar install'.PHP_EOL);
 }
 
-$application = new Application('Container manager');
-$application->add(new UpCommand());
-$application->add(new RebuildCommand());
-$application->add(new SshCommand());
-$application->add(new AnsibleCommand());
-$application->run();
+$app = new Application('Container manager');
+$dispatcher = new EventDispatcher();
+$app->setDispatcher($dispatcher);
+
+// Add container name option
+$app->getDefinition()->addOptions([
+    new InputOption('--name', null, InputOption::VALUE_REQUIRED, 'Custom docker container name'),
+]);
+$dispatcher->addSubscriber(new NameResolverSubscriber());
+
+$app->add(new Command\UpCommand());
+$app->add(new Command\RebuildCommand());
+$app->add(new Command\SshCommand());
+$app->add(new Command\AnsibleCommand());
+
+$app->run();
