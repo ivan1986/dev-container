@@ -39,7 +39,7 @@ RUN apt-get update && apt-get upgrade && apt-get install -y \
     net-tools \
     iputils-ping \
     iproute \
-    ansible
+    ansible \
     && rm -rf /var/lib/apt/lists/*
 # create web user with sudo
 RUN echo 'localhost ansible_connection=local' > /etc/ansible/hosts && \
