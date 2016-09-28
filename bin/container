@@ -1,26 +1,46 @@
 #!/usr/bin/env php
 <?php
 
+use Docker\Docker;
+use Eloquent\Composer\Configuration\ConfigurationReader;
 use Ivan1986\DevContainer\Command;
-use Ivan1986\DevContainer\Event\NameResolverSubscriber;
-use Symfony\Component\Console\Application;
+use Ivan1986\DevContainer\ContainerApplication;
+use Ivan1986\DevContainer\Service\Storage;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 
-function includeIfExists($file)
-{
-    if (file_exists($file)) {
-        return include $file;
+// Detect root dir
+$myPath = dirname(__DIR__);
+$myPath = getcwd();
+if (strpos(basename(__FILE__), 'phar')) {
+    require_once 'phar://'.basename(__FILE__).'/vendor/autoload.php';
+    $myPath = getcwd();
+} else {
+    if (file_exists($myPath.'/vendor/autoload.php')) {
+        require_once $myPath.'/vendor/autoload.php';
+    } elseif (file_exists($myPath.'/../../autoload.php')) {
+        require_once $myPath . '/../../autoload.php';
+        $myPath = dirname(dirname(dirname($myPath)));
+    } else {
+        die('You must set up the project dependencies, run the following commands:'.PHP_EOL.
+            'curl -sS https://getcomposer.org/installer | php'.PHP_EOL.
+            'php composer.phar install'.PHP_EOL);
     }
 }
 
-if ((!$loader = includeIfExists(__DIR__.'/../vendor/autoload.php')) && (!$loader = includeIfExists(__DIR__.'/../../../autoload.php'))) {
-    die('You must set up the project dependencies, run the following commands:'.PHP_EOL.
-        'curl -sS https://getcomposer.org/installer | php'.PHP_EOL.
-        'php composer.phar install'.PHP_EOL);
+if (!file_exists($myPath.'/composer.json')) {
+    $myPath = getcwd();
 }
+if (!file_exists($myPath.'/composer.json')) {
+    die('Can not find composer.json'.PHP_EOL);
+}
+define('PROJECT_DIR', $myPath);
 
-$app = new Application('Container manager');
+$composer = (new ConfigurationReader())->read(PROJECT_DIR . '/composer.json');
+//TODO: Rename class to some good name after write all functions :)
+$storage = new Storage($composer, new Docker());
+$app = new ContainerApplication('Container manager');
+$app->setStorage($storage);
 $dispatcher = new EventDispatcher();
 $app->setDispatcher($dispatcher);
 
@@ -28,11 +48,14 @@ $app->setDispatcher($dispatcher);
 $app->getDefinition()->addOptions([
     new InputOption('--name', null, InputOption::VALUE_REQUIRED, 'Custom docker container name'),
 ]);
-$dispatcher->addSubscriber(new NameResolverSubscriber());
 
-$app->add(new Command\UpCommand());
-$app->add(new Command\RebuildCommand());
-$app->add(new Command\SshCommand());
-$app->add(new Command\AnsibleCommand());
+$dispatcher->addSubscriber($storage);
+
+$app->addCommands([
+    new Command\UpCommand(),
+    new Command\RebuildCommand(),
+    new Command\SshCommand(),
+    new Command\AnsibleCommand()
+]);
 
 $app->run();

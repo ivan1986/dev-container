@@ -16,7 +16,7 @@ class RebuildCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        echo 2;
+        $this->getApplication()->getStorage()->rebuild();
     }
 
 }

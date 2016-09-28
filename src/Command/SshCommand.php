@@ -16,7 +16,7 @@ class SshCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        echo 1;
+        $this->getApplication()->getStorage()->ssh();
     }
 
 }
