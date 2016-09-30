@@ -13,6 +13,7 @@ use Http\Client\Common\Exception\ServerErrorException;
 use Symfony\Component\Console\ConsoleEvents;
 use Symfony\Component\Console\Event\ConsoleCommandEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Symfony\Component\Process\Process;
 
 class Storage implements EventSubscriberInterface
 {
@@ -80,7 +81,9 @@ RUN;
 
     public function ansible()
     {
-        echo 'ansible';
+        $p = new Process('ssh web@'.$this->getContainerIp().' ansible-playbook '.$this->name.'/vendor/ivan1986/dev-container/ansible/playbook.yml');
+        $p->setTty(true);
+        $p->run();
     }
 
     public function rebuild()
@@ -88,6 +91,7 @@ RUN;
         $this->destroy();
         $this->build();
         $this->up();
+        $this->init();
     }
 
     public function destroy()
@@ -101,6 +105,11 @@ RUN;
     protected function init()
     {
         $this->copySshKey();
+        $this->exec('cp '.'/srv/web/'.$this->name.'/vendor/ivan1986/dev-container/ansible/ansible.cfg /srv/web/.ansible.cfg');
+        do {
+            $p = new Process('ssh web@' . $this->getContainerIp() . ' ls');
+            $p->run();
+        } while ($p->getExitCode());
         $this->ansible();
     }
 
@@ -160,7 +169,6 @@ RUN;
             ->setHostname($this->name)
             ->setVolumes([
                 '/sys/fs/cgroup' => new \ArrayObject(),
-                '/srv/web/' . $this->name => new \ArrayObject(),
             ])
             ->setHostConfig(
                 (new HostConfig())
@@ -168,6 +176,7 @@ RUN;
                     ->setBinds([
                         '/sys/fs/cgroup:/sys/fs/cgroup:ro',
                         PROJECT_DIR . ':/srv/web/' . $this->name,
+                        '/home/ivan/projects/DevContainer' . ':/srv/web/' . 'DevContainer',
                     ])
             )
         ;

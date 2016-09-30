@@ -1,0 +1,12 @@
+---
+- hosts: all
+  become: yes
+  become_user: root
+  become_method: sudo
+  tasks:
+    - name: disable selinux
+      file: path=/etc/some_directory state=directory mode=0755
+- hosts: all
+  tasks:
+    - name: echo
+      file: path=~/xxx state=directory mode=0755
