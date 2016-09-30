@@ -53,14 +53,20 @@ class Storage implements EventSubscriberInterface
 
     public function up()
     {
+        $firstRun = false;
         try {
             $container = $this->docker->getContainerManager()->find($this->name);
         } catch (ClientErrorException $e) {
             $this->build();
+            $firstRun = true;
             $container = $this->docker->getContainerManager()->find($this->name);
         }
 
         $this->docker->getContainerManager()->start($this->name);
+
+        if ($firstRun) {
+            $this->init();
+        }
 
         echo <<<RUN
 Container start on {$this->getContainerIp()}
@@ -79,13 +85,23 @@ RUN;
 
     public function rebuild()
     {
+        $this->destroy();
+        $this->build();
+        $this->up();
+    }
+
+    public function destroy()
+    {
         try {
             $container = $this->docker->getContainerManager()->remove($this->name, ['force' => 1]);
         } catch (ClientErrorException $e) {
         }
-        $this->build();
-        $this->up();
+    }
+
+    protected function init()
+    {
         $this->copySshKey();
+        $this->ansible();
     }
 
     protected function getContainerIp()
