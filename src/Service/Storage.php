@@ -3,6 +3,8 @@
 namespace Ivan1986\DevContainer\Service;
 
 use Docker\API\Model\ContainerConfig;
+use Docker\API\Model\ExecConfig;
+use Docker\API\Model\ExecStartConfig;
 use Docker\API\Model\HostConfig;
 use Docker\Docker;
 use Eloquent\Composer\Configuration\Element\Configuration as ComposerConfiguration;
@@ -51,20 +53,23 @@ class Storage implements EventSubscriberInterface
 
     public function up()
     {
-        $container = null;
         try {
             $container = $this->docker->getContainerManager()->find($this->name);
         } catch (ClientErrorException $e) {
-            $container = $this->build();
+            $this->build();
+            $container = $this->docker->getContainerManager()->find($this->name);
         }
-        echo 'up';
 
-    }
+        $this->docker->getContainerManager()->start($this->name);
 
-    public function ssh()
-    {
-        echo 'ssh';
+        echo <<<RUN
+Container start on {$this->getContainerIp()}
+to login type:
+ssh web@{$this->getContainerIp()}
+or
+ssh web@{$this->name}.docker
 
+RUN;
     }
 
     public function ansible()
@@ -75,10 +80,60 @@ class Storage implements EventSubscriberInterface
     public function rebuild()
     {
         try {
-            $container = $this->docker->getContainerManager()->remove($this->name);
+            $container = $this->docker->getContainerManager()->remove($this->name, ['force' => 1]);
         } catch (ClientErrorException $e) {
         }
         $this->build();
+        $this->up();
+        $this->copySshKey();
+    }
+
+    protected function getContainerIp()
+    {
+        try {
+            $containerInfo = $this->docker->getContainerManager()->find($this->name);
+        } catch (ClientErrorException $e) {
+            echo $e->getResponse()->getStatusCode() .' '. $e->getResponse()->getBody();
+        }
+
+        return $containerInfo->getNetworkSettings()->getIPAddress();
+    }
+
+    protected function exec($command)
+    {
+        try {
+            $exec = $this->docker->getExecManager()->create($this->name,
+                (new ExecConfig())
+                    ->setAttachStderr(true)
+                    ->setAttachStdout(true)
+                    ->setTty(true)
+                    ->setCmd(['sh', '-c', $command])
+            );
+        } catch (ServerErrorException $e) {
+            echo $e->getResponse()->getStatusCode() .' '.$e->getResponse()->getBody();
+        } catch (ClientErrorException $e) {
+            echo $e->getResponse()->getStatusCode() .' '. $e->getResponse()->getBody();
+        }
+
+        try {
+            $resp = $this->docker->getExecManager()->start($exec->getId(),
+                (new ExecStartConfig())
+                    ->setTty(true)
+            );
+        } catch (ServerErrorException $e) {
+            echo $e->getResponse()->getStatusCode() .' '.$e->getResponse()->getBody();
+        } catch (ClientErrorException $e) {
+            echo $e->getResponse()->getStatusCode() .' '. $e->getResponse()->getBody();
+        }
+    }
+
+    protected function copySshKey()
+    {
+        $key = file_get_contents($_SERVER['HOME'].'/.ssh/id_rsa.pub');
+        $this->exec('mkdir /srv/web/.ssh');
+        $this->exec('echo \''.$key. '\' > /srv/web/.ssh/authorized_keys');
+        $this->exec('chmod -R 600 /srv/web/.ssh/authorized_keys');
+        $this->exec('chown -R web:web /srv/web/.ssh');
     }
 
     protected function build()
@@ -86,12 +141,18 @@ class Storage implements EventSubscriberInterface
         $config = new ContainerConfig();
         $config
             ->setImage(self::IMAGE)
+            ->setHostname($this->name)
             ->setVolumes([
+                '/sys/fs/cgroup' => new \ArrayObject(),
                 '/srv/web/' . $this->name => new \ArrayObject(),
             ])
             ->setHostConfig(
                 (new HostConfig())
-                    ->setBinds([ PROJECT_DIR . ':/srv/web/' . $this->name ])
+                    ->setPrivileged(true)
+                    ->setBinds([
+                        '/sys/fs/cgroup:/sys/fs/cgroup:ro',
+                        PROJECT_DIR . ':/srv/web/' . $this->name,
+                    ])
             )
         ;
         try {
@@ -101,6 +162,5 @@ class Storage implements EventSubscriberInterface
         } catch (ClientErrorException $e) {
             echo $e->getResponse()->getStatusCode() .' '. $e->getResponse()->getBody();
         }
-        echo 'build';
     }
 }

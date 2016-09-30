@@ -54,7 +54,6 @@ $dispatcher->addSubscriber($storage);
 $app->addCommands([
     new Command\UpCommand(),
     new Command\RebuildCommand(),
-    new Command\SshCommand(),
     new Command\AnsibleCommand()
 ]);
 
