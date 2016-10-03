@@ -25,9 +25,9 @@ class Storage implements EventSubscriberInterface
     protected $name;
 
     /**
-     * @var bool
+     * @var array
      */
-    protected $resolverUpdate = false;
+    protected $resolvers = [];
 
     /**
      * @var Container
@@ -41,7 +41,12 @@ class Storage implements EventSubscriberInterface
         $containerType = $this->getComposerExtra('container', PHP_OS == 'Linux' ? 'docker' : 'vagrant');
 
         $this->container = $containerType == 'docker' ? new Docker() : new Vagrant();
-        $this->resolverUpdate = $this->getComposerExtra('resolver', false);
+
+        $this->resolvers = $this->getComposerExtra('resolvers', []);
+        $resolver = $this->getComposerExtra('resolver', false);
+        if ($resolver) {
+            $this->resolvers[] = $resolver;
+        }
     }
 
     public static function getSubscribedEvents()
@@ -70,6 +75,15 @@ class Storage implements EventSubscriberInterface
 
         if ($firstRun) {
             $this->init();
+        }
+
+        if ($this->resolvers) {
+            foreach($this->resolvers as $resolver) {
+                echo $resolver.' set ';
+                (new Process('echo "nameserver '.$this->container->getIP().'" | sudo tee /etc/resolver/'.$resolver))
+                    ->setTty(true)
+                    ->run();
+            }
         }
 
         echo <<<RUN

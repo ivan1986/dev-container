@@ -29,8 +29,7 @@ You can `up` `rebuild` and `destroy` container and run `ansible` for update prov
 Container name get from composer.json - project name. Install `libnss-docker` for auto-resolve hosts.
 
 If you need custom DNS for big project install `libnss-resolver` and activate role `dns`. (not implemented yet)
-
-<!-- TODO: DNS init -->
+in composer extra `resolver` set to domain or array of domains for resolve to container.
 
 ##Ansible
 
