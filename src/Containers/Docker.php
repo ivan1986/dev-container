@@ -54,7 +54,7 @@ class Docker implements Container
         try {
             $containerInfo = $this->docker->getContainerManager()->find($this->name);
         } catch (ClientErrorException $e) {
-            echo $e->getResponse()->getStatusCode() .' '. $e->getResponse()->getBody();
+            echo $e->getResponse()->getStatusCode().' '.$e->getResponse()->getBody();
         }
 
         return $containerInfo->getNetworkSettings()->getIPAddress();
@@ -74,17 +74,17 @@ class Docker implements Container
                     ->setPrivileged(true)
                     ->setBinds([
                         '/sys/fs/cgroup:/sys/fs/cgroup:ro',
-                        PROJECT_DIR . ':/srv/web/' . $this->name,
-                        '/home/ivan/projects/DevContainer' . ':/srv/web/' . 'DevContainer',
+                        PROJECT_DIR.':/srv/web/'.$this->name,
+                        '/home/ivan/projects/DevContainer'.':/srv/web/'.'DevContainer',
                     ])
             )
         ;
         try {
             $this->docker->getContainerManager()->create($config, ['name' => $this->name]);
         } catch (ServerErrorException $e) {
-            echo $e->getResponse()->getStatusCode() .' '.$e->getResponse()->getBody();
+            echo $e->getResponse()->getStatusCode().' '.$e->getResponse()->getBody();
         } catch (ClientErrorException $e) {
-            echo $e->getResponse()->getStatusCode() .' '. $e->getResponse()->getBody();
+            echo $e->getResponse()->getStatusCode().' '.$e->getResponse()->getBody();
         }
     }
 
@@ -112,9 +112,9 @@ class Docker implements Container
                     ->setCmd(['sh', '-c', $command])
             );
         } catch (ServerErrorException $e) {
-            echo $e->getResponse()->getStatusCode() .' '.$e->getResponse()->getBody();
+            echo $e->getResponse()->getStatusCode().' '.$e->getResponse()->getBody();
         } catch (ClientErrorException $e) {
-            echo $e->getResponse()->getStatusCode() .' '. $e->getResponse()->getBody();
+            echo $e->getResponse()->getStatusCode().' '.$e->getResponse()->getBody();
         }
 
         try {
@@ -123,9 +123,9 @@ class Docker implements Container
                     ->setTty(true)
             );
         } catch (ServerErrorException $e) {
-            echo $e->getResponse()->getStatusCode() .' '.$e->getResponse()->getBody();
+            echo $e->getResponse()->getStatusCode().' '.$e->getResponse()->getBody();
         } catch (ClientErrorException $e) {
-            echo $e->getResponse()->getStatusCode() .' '. $e->getResponse()->getBody();
+            echo $e->getResponse()->getStatusCode().' '.$e->getResponse()->getBody();
         }
     }
 
