@@ -1,10 +1,10 @@
 #!/usr/bin/env php
 <?php
 
-use Docker\Docker;
 use Eloquent\Composer\Configuration\ConfigurationReader;
 use Ivan1986\DevContainer\Command;
 use Ivan1986\DevContainer\ContainerApplication;
+use Ivan1986\DevContainer\Containers\Docker;
 use Ivan1986\DevContainer\Service\Storage;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\EventDispatcher\EventDispatcher;
