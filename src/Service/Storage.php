@@ -78,7 +78,7 @@ class Storage implements EventSubscriberInterface
         }
 
         if ($this->resolvers) {
-            foreach($this->resolvers as $resolver) {
+            foreach ($this->resolvers as $resolver) {
                 echo $resolver.' set ';
                 (new Process('echo "nameserver '.$this->container->getIP().'" | sudo tee /etc/resolver/'.$resolver))
                     ->setTty(true)
@@ -122,7 +122,7 @@ RUN;
         $this->container->exec('cp '.'/srv/web/'.$this->container->getName().'/vendor/ivan1986/dev-container/ansible/init.sh /srv/web/init.sh');
         $this->container->exec('sed s/#name#/'.$this->container->getName().'/g '.'/srv/web/'.$this->container->getName().'/vendor/ivan1986/dev-container/ansible/ansible.cfg > /srv/web/.ansible.cfg');
         do {
-            $p = new Process('ssh web@' . $this->container->getIP() . ' ls');
+            $p = new Process('ssh web@'.$this->container->getIP().' ls');
             $p->run();
         } while ($p->getExitCode());
         $this->ansible();
@@ -133,11 +133,14 @@ RUN;
     {
         $key = file_get_contents($_SERVER['HOME'].'/.ssh/id_rsa.pub');
         $this->container->exec('mkdir /srv/web/.ssh');
-        $this->container->exec('echo \''.$key. '\' > /srv/web/.ssh/authorized_keys');
+        $this->container->exec('echo \''.$key.'\' > /srv/web/.ssh/authorized_keys');
         $this->container->exec('chmod -R 600 /srv/web/.ssh/authorized_keys');
         $this->container->exec('chown -R web:web /srv/web/.ssh');
     }
 
+    /**
+     * @param string $name
+     */
     protected function getComposerExtra($name, $default = null)
     {
         $extra = $this->composer->extra();
