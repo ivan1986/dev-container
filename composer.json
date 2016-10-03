@@ -1,7 +1,7 @@
 {
     "name": "ivan1986/dev-container",
     "description": "Create vm for develop by ansible and docker",
-    "homepage": "https://github.com/jdorn/sql-formatter/",
+    "homepage": "https://github.com/ivan1986/dev-container",
     "keywords": ["docker", "ansible", "dev"],
     "type": "library",
     "license": "MIT",
@@ -21,8 +21,13 @@
     "require": {
         "symfony/console": "~3.0",
         "eloquent/composer-config-reader": "~2.0",
-        "docker-php/docker-php": "~1.24"
+        "docker-php/docker-php": "~1.24",
+        "php-school/cli-menu": "*"
+    },
+    "provide": {
+        "ext-mbstring": "*"
     },
     "suggest": {
+        "php-school/cli-menu": "For init menu"
     }
 }

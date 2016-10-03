@@ -2,14 +2,11 @@
 
 namespace Ivan1986\DevContainer\Service;
 
-use Docker\API\Model\ContainerConfig;
-use Docker\API\Model\ExecConfig;
-use Docker\API\Model\ExecStartConfig;
-use Docker\API\Model\HostConfig;
 use Eloquent\Composer\Configuration\Element\Configuration as ComposerConfiguration;
-use Http\Client\Common\Exception\ClientErrorException;
-use Http\Client\Common\Exception\ServerErrorException;
 use Ivan1986\DevContainer\Containers\Container;
+use Ivan1986\DevContainer\Containers\Docker;
+use Ivan1986\DevContainer\Containers\Vagrant;
+use stdClass;
 use Symfony\Component\Console\ConsoleEvents;
 use Symfony\Component\Console\Event\ConsoleCommandEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -28,14 +25,23 @@ class Storage implements EventSubscriberInterface
     protected $name;
 
     /**
+     * @var bool
+     */
+    protected $resolverUpdate = false;
+
+    /**
      * @var Container
      */
-    private $docker;
+    private $container;
 
-    public function __construct(ComposerConfiguration $composer, Container $docker)
+    public function __construct(ComposerConfiguration $composer)
     {
         $this->composer = $composer;
-        $this->docker = $docker;
+
+        $containerType = $this->getComposerExtra('container', PHP_OS == 'Linux' ? 'docker' : 'vagrant');
+
+        $this->container = $containerType == 'docker' ? new Docker() : new Vagrant();
+        $this->resolverUpdate = $this->getComposerExtra('resolver', false);
     }
 
     public static function getSubscribedEvents()
@@ -47,7 +53,7 @@ class Storage implements EventSubscriberInterface
 
     public function onCommand(ConsoleCommandEvent $event)
     {
-        $this->docker->setName(
+        $this->container->setName(
             $event->getInput()->getOption('name') ?: $this->composer->projectName()
         );
     }
@@ -55,30 +61,30 @@ class Storage implements EventSubscriberInterface
     public function up()
     {
         $firstRun = false;
-        if (!$this->docker->exist()) {
-            $this->docker->build();
+        if (!$this->container->exist()) {
+            $this->container->build();
             $firstRun = true;
         }
 
-        $this->docker->start();
+        $this->container->start();
 
         if ($firstRun) {
             $this->init();
         }
 
         echo <<<RUN
-Container start on {$this->docker->getIP()}
+Container start on {$this->container->getIP()}
 to login type:
-ssh web@{$this->docker->getIP()}
+ssh web@{$this->container->getIP()}
 or
-ssh web@{$this->docker->getName()}.docker
+ssh web@{$this->container->getName()}.docker
 
 RUN;
     }
 
     public function ansible()
     {
-        (new Process('ssh web@'.$this->docker->getIP().' ./init.sh '.$this->docker->getName()))
+        (new Process('ssh web@'.$this->container->getIP().' ./init.sh '.$this->container->getName()))
             ->setTty(true)
             ->run();
     }
@@ -86,23 +92,23 @@ RUN;
     public function rebuild()
     {
         $this->destroy();
-        $this->docker->build();
+        $this->container->build();
         $this->up();
         $this->init();
     }
 
     public function destroy()
     {
-        $this->docker->destroy();
+        $this->container->destroy();
     }
 
     protected function init()
     {
         $this->copySshKey();
-        $this->docker->exec('cp '.'/srv/web/'.$this->docker->getName().'/vendor/ivan1986/dev-container/ansible/init.sh /srv/web/init.sh');
-        $this->docker->exec('sed s/#name#/'.$this->docker->getName().'/g '.'/srv/web/'.$this->docker->getName().'/vendor/ivan1986/dev-container/ansible/ansible.cfg > /srv/web/.ansible.cfg');
+        $this->container->exec('cp '.'/srv/web/'.$this->container->getName().'/vendor/ivan1986/dev-container/ansible/init.sh /srv/web/init.sh');
+        $this->container->exec('sed s/#name#/'.$this->container->getName().'/g '.'/srv/web/'.$this->container->getName().'/vendor/ivan1986/dev-container/ansible/ansible.cfg > /srv/web/.ansible.cfg');
         do {
-            $p = new Process('ssh web@' . $this->docker->getIP() . ' ls');
+            $p = new Process('ssh web@' . $this->container->getIP() . ' ls');
             $p->run();
         } while ($p->getExitCode());
         $this->ansible();
@@ -112,10 +118,17 @@ RUN;
     protected function copySshKey()
     {
         $key = file_get_contents($_SERVER['HOME'].'/.ssh/id_rsa.pub');
-        $this->docker->exec('mkdir /srv/web/.ssh');
-        $this->docker->exec('echo \''.$key. '\' > /srv/web/.ssh/authorized_keys');
-        $this->docker->exec('chmod -R 600 /srv/web/.ssh/authorized_keys');
-        $this->docker->exec('chown -R web:web /srv/web/.ssh');
+        $this->container->exec('mkdir /srv/web/.ssh');
+        $this->container->exec('echo \''.$key. '\' > /srv/web/.ssh/authorized_keys');
+        $this->container->exec('chmod -R 600 /srv/web/.ssh/authorized_keys');
+        $this->container->exec('chown -R web:web /srv/web/.ssh');
     }
 
+    protected function getComposerExtra($name, $default = null)
+    {
+        $extra = $this->composer->extra();
+        $extra = property_exists($extra, 'dev-container') ? $extra->{'dev-container'} : new stdClass();
+
+        return property_exists($extra, $name) ? $extra->{$name} : $default;
+    }
 }

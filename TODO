@@ -6,6 +6,15 @@ ansible + galaxy (роли + updater) и кастомные в файлал пр
 файлик настроек ансибла в проект с дефолтовыми параметрами
 настройки lamp
 включения DNS - три варианта - через докер, через libnss-resolver
+По дефолту через докер, два параметра в композере
+    - container - докер или вагрант, по дефолту auto (linux - docker, остальное - vagrant)
+    - регистрации ресолвера - прописывает контейнер в resolver, по дефолту false
+
 https://github.com/robbiev/devdns и dnsmasq
 
 Отдельное консольно приложение и интеграция в основную симфонийскую консоль
+
+Убрать "ext-mbstring" после фикса бага в "beberlei/assert" ("php-school/cli-menu")
+https://github.com/beberlei/assert/pull/149
+https://github.com/symfony/polyfill/pull/54
+https://github.com/composer/composer/issues/5030

@@ -4,10 +4,4 @@
   become_method: sudo
   roles:
     - jdauphant.nginx
-  tasks:
-    - name: disable selinux
-      file: path=/etc/some_directory state=directory mode=0755
 - hosts: all
-  tasks:
-    - name: echo
-      file: path=~/xxx state=directory mode=0755

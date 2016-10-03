@@ -38,7 +38,8 @@ define('PROJECT_DIR', $myPath);
 
 $composer = (new ConfigurationReader())->read(PROJECT_DIR . '/composer.json');
 //TODO: Rename class to some good name after write all functions :)
-$storage = new Storage($composer, new Docker());
+$storage = new Storage($composer);
+
 $app = new ContainerApplication('Container manager');
 $app->setStorage($storage);
 $dispatcher = new EventDispatcher();
@@ -52,6 +53,7 @@ $app->getDefinition()->addOptions([
 $dispatcher->addSubscriber($storage);
 
 $app->addCommands([
+    new Command\InitCommand(),
     new Command\UpCommand(),
     new Command\RebuildCommand(),
     new Command\DestroyCommand(),
