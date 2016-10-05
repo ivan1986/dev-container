@@ -42,7 +42,9 @@ class Docker implements Container
     public function exist()
     {
         try {
-            $container = $this->docker->getContainerManager()->find($this->name);
+            $this->docker->getContainerManager()->find($this->name);
+        } catch (ServerErrorException $e) {
+            return false;
         } catch (ClientErrorException $e) {
             return false;
         }
@@ -53,8 +55,10 @@ class Docker implements Container
     {
         try {
             $containerInfo = $this->docker->getContainerManager()->find($this->name);
+        } catch (ServerErrorException $e) {
+            throw new ContainerException($e->getMessage(), $e->getCode());
         } catch (ClientErrorException $e) {
-            echo $e->getResponse()->getStatusCode().' '.$e->getResponse()->getBody();
+            throw new ContainerException($e->getMessage(), $e->getCode());
         }
 
         return $containerInfo->getNetworkSettings()->getIPAddress();
@@ -82,9 +86,9 @@ class Docker implements Container
         try {
             $this->docker->getContainerManager()->create($config, ['name' => $this->name]);
         } catch (ServerErrorException $e) {
-            echo $e->getResponse()->getStatusCode().' '.$e->getResponse()->getBody();
+            throw new ContainerException($e->getMessage(), $e->getCode());
         } catch (ClientErrorException $e) {
-            echo $e->getResponse()->getStatusCode().' '.$e->getResponse()->getBody();
+            throw new ContainerException($e->getMessage(), $e->getCode());
         }
     }
 
@@ -97,7 +101,10 @@ class Docker implements Container
     {
         try {
             $this->docker->getContainerManager()->remove($this->name, ['force' => 1]);
+        } catch (ServerErrorException $e) {
+            throw new ContainerException($e->getMessage(), $e->getCode());
         } catch (ClientErrorException $e) {
+            throw new ContainerException($e->getMessage(), $e->getCode());
         }
     }
 
@@ -112,20 +119,20 @@ class Docker implements Container
                     ->setCmd(['sh', '-c', $command])
             );
         } catch (ServerErrorException $e) {
-            echo $e->getResponse()->getStatusCode().' '.$e->getResponse()->getBody();
+            throw new ContainerException($e->getMessage(), $e->getCode());
         } catch (ClientErrorException $e) {
-            echo $e->getResponse()->getStatusCode().' '.$e->getResponse()->getBody();
+            throw new ContainerException($e->getMessage(), $e->getCode());
         }
 
         try {
-            $resp = $this->docker->getExecManager()->start($exec->getId(),
+            $this->docker->getExecManager()->start($exec->getId(),
                 (new ExecStartConfig())
                     ->setTty(true)
             );
         } catch (ServerErrorException $e) {
-            echo $e->getResponse()->getStatusCode().' '.$e->getResponse()->getBody();
+            throw new ContainerException($e->getMessage(), $e->getCode());
         } catch (ClientErrorException $e) {
-            echo $e->getResponse()->getStatusCode().' '.$e->getResponse()->getBody();
+            throw new ContainerException($e->getMessage(), $e->getCode());
         }
     }
 
