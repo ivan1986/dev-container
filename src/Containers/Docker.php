@@ -123,13 +123,7 @@ class Docker implements Container
                     ->setTty(true)
                     ->setCmd(['sh', '-c', $command])
             );
-        } catch (ServerErrorException $e) {
-            throw new ContainerException($e->getMessage(), $e->getCode());
-        } catch (ClientErrorException $e) {
-            throw new ContainerException($e->getMessage(), $e->getCode());
-        }
 
-        try {
             $this->docker->getExecManager()->start($exec->getId(),
                 (new ExecStartConfig())
                     ->setTty(true)
