@@ -30,6 +30,10 @@ class Vagrant implements Container
     {
     }
 
+    public function getSSH()
+    {
+    }
+
     public function build()
     {
     }

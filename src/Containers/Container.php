@@ -13,6 +13,8 @@ interface Container
 
     public function getIP();
 
+    public function getSSH();
+
     public function build();
 
     public function start();

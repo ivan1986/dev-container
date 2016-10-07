@@ -89,9 +89,7 @@ class Storage implements EventSubscriberInterface
         echo <<<RUN
 Container start on {$this->container->getIP()}
 to login type:
-ssh web@{$this->container->getIP()}
-or
-ssh web@{$this->container->getName()}.docker
+ssh {$this->container->getSSH()}
 
 RUN;
     }

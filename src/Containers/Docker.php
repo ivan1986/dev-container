@@ -64,6 +64,11 @@ class Docker implements Container
         return $containerInfo->getNetworkSettings()->getIPAddress();
     }
 
+    public function getSSH()
+    {
+        return 'web@'.$this->getName().'.docker';
+    }
+
     public function build()
     {
         $config = new ContainerConfig();

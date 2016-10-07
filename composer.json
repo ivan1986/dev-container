@@ -17,12 +17,11 @@
     "bin": [
         "bin/container"
     ],
-    "minimum-stability": "dev",
     "require": {
         "symfony/console": "~3.0",
         "eloquent/composer-config-reader": "~2.0",
         "docker-php/docker-php": "~1.24",
-        "php-school/cli-menu": "*"
+        "php-school/cli-menu": "~1.2"
     },
     "provide": {
         "ext-mbstring": "*"
