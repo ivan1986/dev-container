@@ -2,6 +2,8 @@
   become: yes
   become_user: root
   become_method: sudo
+- hosts: all
   roles:
     - jdauphant.nginx
-- hosts: all
+    - common-system-deb
+    - php-fpm-deb

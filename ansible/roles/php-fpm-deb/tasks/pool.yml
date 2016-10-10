@@ -1,0 +1,7 @@
+---
+- name: configure php-fpm-pool
+  become: yes
+  template: src=pool.j2
+            dest="/etc/php/7.0/fpm/pool.d/{{php_fpm.pool}}.conf"
+            owner=root group=root mode=0644
+  notify: restart php fpm

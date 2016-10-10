@@ -1,0 +1,19 @@
+- name: install composer
+  shell: curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin creates=/usr/local/bin/composer.phar
+  tags: composer
+  sudo: yes
+
+- name: make composer executable
+  file: path=/usr/local/bin/composer.phar mode=a+x state=file
+  tags: composer
+  sudo: yes
+
+- name: link composer
+  file: src=/usr/local/bin/composer.phar dest=/usr/local/bin/composer state=link
+  tags: composer
+  sudo: yes
+
+- name: cron update composer
+  copy: content="#!/bin/sh\n/usr/local/bin/composer.phar self-update" dest=/etc/cron.weekly/composer-update mode=u+x
+  tags: composer
+  sudo: yes

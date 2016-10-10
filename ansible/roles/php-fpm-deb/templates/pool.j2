@@ -1,0 +1,18 @@
+; {{ ansible_managed }}
+[{{ php_fpm.pool }}]
+user = {{ php_fpm.user }}
+group = {{ php_fpm.group }}
+
+listen = {{ php_fpm.socket }}
+listen.owner = {{ php_fpm.user }}
+listen.group = {{ php_fpm.group }}
+listen.mode = 0666
+
+pm = dynamic
+pm.max_children = 2
+pm.start_servers = 1
+pm.min_spare_servers = 1
+pm.max_spare_servers = 2
+pm.max_requests = 100
+
+chdir = /

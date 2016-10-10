@@ -1,0 +1,9 @@
+---
+- name: Install usefull console stuff
+  sudo: yes
+  apt: pkg={{item}} state=latest update_cache=yes autoremove=yes
+  with_items:
+      - aptitude
+      - vim
+      - htop
+      - curl
