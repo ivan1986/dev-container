@@ -71,6 +71,16 @@ class Docker implements Container
 
     public function build()
     {
+        $mapping = [
+            '/sys/fs/cgroup:/sys/fs/cgroup:ro',
+            PROJECT_DIR.':/srv/web/'.$this->name,
+        ];
+
+        // TODO: dev mapping - remove after release
+        if (is_dir(PROJECT_DIR.'/../DevContainer')) {
+            $mapping[] = realpath(PROJECT_DIR.'/../DevContainer').':/srv/web/'.'DevContainer';
+        }
+
         $config = new ContainerConfig();
         $config
             ->setImage(self::IMAGE)
@@ -81,11 +91,7 @@ class Docker implements Container
             ->setHostConfig(
                 (new HostConfig())
                     ->setPrivileged(true)
-                    ->setBinds([
-                        '/sys/fs/cgroup:/sys/fs/cgroup:ro',
-                        PROJECT_DIR.':/srv/web/'.$this->name,
-                        '/home/ivan/projects/DevContainer'.':/srv/web/'.'DevContainer',
-                    ])
+                    ->setBinds($mapping)
             )
         ;
         try {
