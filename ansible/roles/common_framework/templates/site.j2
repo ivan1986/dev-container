@@ -1,0 +1,20 @@
+# {{ ansible_managed }}
+server {
+
+  server_name {{ site.host }};
+  root /srv/web/{{ ansible_hostname }}/{{ site.root }};
+
+  location / {
+    index $uri $uri/ index.php;
+  }
+
+  # pass the PHP scripts socket
+  location ~ \.php {
+    fastcgi_pass unix:{{ php_fpm.socket }};
+    fastcgi_split_path_info ^(.+\.php)(/.*)$;
+    include fastcgi_params;
+    fastcgi_param  SCRIPT_FILENAME    $document_root$fastcgi_script_name;
+    fastcgi_param  HTTPS              off;
+  }
+
+}

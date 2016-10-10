@@ -1,6 +1,5 @@
 ---
 - name: Install php-fpm
-  sudo: yes
   apt: pkg={{item}} state=latest update_cache=yes autoremove=yes
   with_items:
       - php-fpm

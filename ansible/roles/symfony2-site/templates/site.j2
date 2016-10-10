@@ -1,0 +1,35 @@
+# {{ ansible_managed }}
+server {
+
+  server_name {{ site.host }};
+  root /srv/web/{{ ansible_hostname }}/web;
+
+  error_log /srv/web/{{ ansible_hostname }}/var/logs/nginx_error.log;
+  access_log /srv/web/{{ ansible_hostname }}/var/logs/nginx.log;
+
+  # strip app_dev.php/ prefix if it is present
+  rewrite ^/app_dev\.php/?(.*)$ /$1 permanent;
+
+  location / {
+    index app_dev.php;
+    try_files $uri @rewriteapp;
+  }
+
+  location ~ ^/app\.php {
+    return 403;
+  }
+
+  location @rewriteapp {
+    rewrite ^(.*)$ /app_dev.php/$1 last;
+  }
+
+  # pass the PHP scripts socket
+  location ~ ^/app_dev\.php(/|$) {
+    fastcgi_pass unix:{{ php_fpm.socket }};
+    fastcgi_split_path_info ^(.+\.php)(/.*)$;
+    include fastcgi_params;
+    fastcgi_param  SCRIPT_FILENAME    $document_root$fastcgi_script_name;
+    fastcgi_param  HTTPS              off;
+  }
+
+}

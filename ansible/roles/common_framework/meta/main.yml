@@ -1,0 +1,6 @@
+---
+allow_duplicates: yes
+dependencies:
+  - jdauphant.nginx
+  - php_fpm_deb
+

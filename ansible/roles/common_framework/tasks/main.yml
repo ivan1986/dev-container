@@ -1,0 +1,12 @@
+---
+- name: "{{ ansible_hostname }} nginx conf"
+  become: yes
+  template: src=site.j2
+            dest="/etc/nginx/sites-available/{{ansible_hostname}}.conf"
+            owner=root group=root mode=0644
+  notify: reload nginx
+
+- name: "{{ ansible_hostname }} nginx conf symlink"
+  become: yes
+  file: src="/etc/nginx/sites-available/{{ansible_hostname}}.conf" dest="/etc/nginx/sites-enabled/{{ansible_hostname}}.conf" state=link
+  notify: reload nginx

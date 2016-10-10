@@ -3,4 +3,4 @@ php_fpm:
   pool: "web"
   user: "web"
   group: "web"
-  socket: "/run/web.socket"
+  socket: "/run/php/web.socket"

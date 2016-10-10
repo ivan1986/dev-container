@@ -1,0 +1,4 @@
+---
+site:
+  host: "{{ansible_hostname}}.docker"
+  root: "web"
