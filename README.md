@@ -12,6 +12,10 @@ Add to composer
         "ivan1986/dev-container": "*",
     },
 
+or
+
+    composer require ivan1986/dev-container --dev
+
 run
 
     vendor/bin/container init
@@ -44,6 +48,6 @@ Configure you project specific roles in `dev-container/playbook.yml` file. Roles
 
 - `dev-container/roles` - you own roles
 - `dev-container/roles/community` - you install from `dev-container/roles/requirements.yml`
-- `ivan1986/dev-container/ansible/roles`
+- `vendor/ivan1986/dev-container/ansible/roles` - ready roles
 - `vendor/ivan1986/dev-container/ansible/roles/community`
 

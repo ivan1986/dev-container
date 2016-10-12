@@ -8,7 +8,6 @@ class Vagrant implements Container
 
     public function __construct()
     {
-        die('Not implemented yet');
     }
 
     public function setName($name)
