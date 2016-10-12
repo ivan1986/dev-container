@@ -77,7 +77,7 @@ class Storage implements EventSubscriberInterface
             $this->init();
         }
 
-        if ($this->resolvers) {
+        if (!empty($this->resolvers)) {
             foreach ($this->resolvers as $resolver) {
                 echo $resolver.' set ';
                 (new Process('echo "nameserver '.$this->container->getIP().'" | sudo tee /etc/resolver/'.$resolver))
@@ -128,7 +128,7 @@ RUN;
 
     protected function copySshKey()
     {
-        $key = file_get_contents($_SERVER['HOME'].'/.ssh/id_rsa.pub');
+        $key = file_get_contents(getenv('HOME').'/.ssh/id_rsa.pub');
         $this->container->exec('mkdir /srv/web/.ssh');
         $this->container->exec('echo \''.$key.'\' > /srv/web/.ssh/authorized_keys');
         $this->container->exec('chmod -R 600 /srv/web/.ssh/authorized_keys');
