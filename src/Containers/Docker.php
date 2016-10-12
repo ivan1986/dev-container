@@ -48,6 +48,7 @@ class Docker implements Container
         } catch (ClientErrorException $e) {
             return false;
         }
+
         return true;
     }
 
@@ -140,5 +141,4 @@ class Docker implements Container
             throw new ContainerException($e->getMessage(), $e->getCode());
         }
     }
-
 }

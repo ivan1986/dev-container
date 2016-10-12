@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Ivan1986\DevContainer;
 
 use Ivan1986\DevContainer\Service\Storage;

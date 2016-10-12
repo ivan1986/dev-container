@@ -6,7 +6,6 @@ class Vagrant implements Container
 {
     protected $name;
 
-
     public function __construct()
     {
         die('Not implemented yet');
@@ -49,5 +48,4 @@ class Vagrant implements Container
     public function exec($command)
     {
     }
-
 }

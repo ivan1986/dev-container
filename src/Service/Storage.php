@@ -126,7 +126,6 @@ RUN;
         $this->ansible();
     }
 
-
     protected function copySshKey()
     {
         $key = file_get_contents($_SERVER['HOME'].'/.ssh/id_rsa.pub');
