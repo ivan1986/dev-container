@@ -4,6 +4,8 @@
   with_items:
       - php-fpm
       - php-cli
+      - php-zip
+      - php-curl
       - composer
 
 - include: pool.yml

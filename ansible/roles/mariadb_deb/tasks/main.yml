@@ -1,0 +1,15 @@
+---
+- name: Install mariadb
+  apt: pkg={{item}} state=latest update_cache=yes autoremove=yes
+  with_items:
+      - mariadb-client
+      - mariadb-server
+      - php-mysql
+  notify: restart db
+
+- name: start db
+  service: name=mysql state=started
+
+- name: Fix privileges
+  command: mysql -uroot mysql -e "update user set plugin='' where User='root'; flush privileges;"
+  changed_when: false

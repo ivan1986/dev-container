@@ -65,6 +65,16 @@ class Storage implements EventSubscriberInterface
 
     public function up()
     {
+        if (!is_file(PROJECT_DIR.'/dev-container/playbook.yml')) {
+            echo <<<RUN
+run
+vendor/bin/container init
+for init
+
+RUN;
+            return;
+        }
+
         $firstRun = false;
         if (!$this->container->exist()) {
             $this->container->build();
@@ -86,12 +96,7 @@ class Storage implements EventSubscriberInterface
             }
         }
 
-        echo <<<RUN
-Container start on {$this->container->getIP()}
-to login type:
-ssh {$this->container->getSSH()}
-
-RUN;
+        $this->info();
     }
 
     public function ansible()
@@ -107,6 +112,7 @@ RUN;
         $this->container->build();
         $this->up();
         $this->init();
+        $this->info();
     }
 
     public function destroy()
@@ -118,12 +124,22 @@ RUN;
     {
         $this->copySshKey();
         $this->container->exec('cp '.'/srv/web/'.$this->container->getName().'/vendor/ivan1986/dev-container/ansible/init.sh /srv/web/init.sh');
-        $this->container->exec('sed s/#name#/'.$this->container->getName().'/g '.'/srv/web/'.$this->container->getName().'/vendor/ivan1986/dev-container/ansible/ansible.cfg > /srv/web/.ansible.cfg');
+        $this->container->exec('sed \'s$#path#$/srv/web/deb-pkg$g\' /srv/web/deb-pkg/vendor/ivan1986/dev-container/ansible/ansible.cfg > /srv/web/.ansible.cfg');
         do {
             $p = new Process('ssh web@'.$this->container->getIP().' ls');
             $p->run();
         } while ($p->getExitCode());
         $this->ansible();
+    }
+
+    protected function info()
+    {
+        echo <<<RUN
+Container start on {$this->container->getIP()}
+to login type:
+ssh {$this->container->getSSH()}
+
+RUN;
     }
 
     protected function copySshKey()

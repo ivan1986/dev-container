@@ -4,5 +4,6 @@
   become_method: sudo
   roles:
     - common_system_deb
+    - mariadb_deb
     - symfony2-site
 - hosts: all
