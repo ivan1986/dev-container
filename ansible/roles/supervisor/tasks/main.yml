@@ -1,0 +1,5 @@
+---
+- name: Install supervisor
+  apt: pkg={{item}} state=latest update_cache=yes autoremove=yes
+  with_items:
+      - supervisor
