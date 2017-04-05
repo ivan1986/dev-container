@@ -19,6 +19,7 @@
     ],
     "require": {
         "symfony/console": "~3.0",
+        "symfony/event-dispatcher": "~3.0",
         "eloquent/composer-config-reader": "~2.0",
         "docker-php/docker-php": "~1.24"
     },
