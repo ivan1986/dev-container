@@ -151,13 +151,13 @@ RUN;
         $this->container->exec('chown -R web:web /srv/web/.ssh');
     }
 
-    /**
-     * @param string $name
-     */
     protected function getComposerExtra($name, $default = null)
     {
         $extra = $this->composer->extra();
-        $extra = property_exists($extra, 'dev-container') ? $extra->{'dev-container'} : new stdClass();
+        if (!$extra || !property_exists($extra, 'dev-container')) {
+            return $default;
+        }
+        $extra = $extra->{'dev-container'};
 
         return property_exists($extra, $name) ? $extra->{$name} : $default;
     }
