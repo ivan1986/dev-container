@@ -5,7 +5,8 @@ server {
   root /srv/web/{{ ansible_hostname }}/{{ site.root }};
 
   location / {
-    index $uri $uri/ index.php;
+    index index.php;
+    try_files $uri $uri/ index.php;
   }
 
   # pass the PHP scripts socket
