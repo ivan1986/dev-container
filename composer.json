@@ -23,9 +23,6 @@
         "eloquent/composer-config-reader": "~2.0",
         "docker-php/docker-php": "~1.24"
     },
-    "provide": {
-        "ext-mbstring": "*"
-    },
     "suggest": {
         "php-school/cli-menu": "For init menu"
     }
